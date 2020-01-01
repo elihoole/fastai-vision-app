@@ -7,9 +7,9 @@ from io import BytesIO
 from fastai.vision import *
 import base64
 
-model_file_url = 'https://drive.google.com/uc?export=download&id=1-SjgZDA-5c4WgRGQggQgbqkZdyXEhod8'
+export_file_url = 'https://drive.google.com/uc?export=download&id=1-SjgZDA-5c4WgRGQggQgbqkZdyXEhod8'
 
-model_file_name = 'export.pkl'
+export_file_name = 'export.pkl'
 classes = ['bacterial_spot', 'early_blight', 'late_blight', 'leaf_mold', 'Septoria_leaf_spot', 'Two-spotted_spider_mites', 'target_spot', 'yello_leaf_curl_virus', 'mosaic_virus', 'healthy']
 
 
@@ -27,7 +27,7 @@ async def download_file(url, dest):
             with open(dest, 'wb') as f: f.write(data)
 
 async def setup_learner():
-    await download_file(model_file_url, path/'models'/f'{model_file_name}.pth')
+    await download_file(export_file_url, path / export_file_name)
     data_bunch = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
     learn = create_cnn(data_bunch, models.resnet34, pretrained=False)
     learn.load(model_file_name)
