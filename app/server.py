@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 import uvicorn, aiohttp, asyncio
 from io import BytesIO
 from fastai.vision import *
+from fastai import *
 import base64
 
 export_file_url = 'https://drive.google.com/uc?export=download&id=1-SjgZDA-5c4WgRGQggQgbqkZdyXEhod8'
@@ -29,10 +30,22 @@ async def download_file(url, dest):
 
 async def setup_learner():
     await download_file(export_file_url, path /export_file_name)
-    data_bunch = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
-    learn = cnn_learner(data_bunch, models.resnet34, pretrained=False)
-    learn.load(export_file_name)
-    return learn
+    #data_bunch = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
+    #learn = cnn_learner(data_bunch, models.resnet34, pretrained=False)
+    #learn.load(export_file_name)
+    #return learn
+    #await download_file(export_file_url, path / export_file_name)
+    try:
+        learn = load_learner(path, export_file_name)
+        return learn
+    except RuntimeError as e:
+        if len(e.args) > 0 and 'CPU-only machine' in e.args[0]:
+            print(e)
+            message = "\n\nThis model was trained with an old version of fastai and will not work in a CPU environment.\n\nPlease update the fastai library in your training environment and export your model again.\n\nSee instructions for 'Returning to work' at https://course.fast.ai."
+            raise RuntimeError(message)
+        else:
+            raise
+
 
 loop = asyncio.get_event_loop()
 tasks = [asyncio.ensure_future(setup_learner())]
